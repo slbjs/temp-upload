@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>🔥 Temp File Uploader</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      max-width: 500px;
+      margin: auto;
+    }
+    input[type="file"] {
+      margin-bottom: 1rem;
+    }
+    .link {
+      margin-top: 1rem;
+      word-break: break-word;
+      background: #f0f0f0;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #008cff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>Upload File (Expires in 3 Hours)</h2>
+
+  <form id="uploadForm">
+    <input type="file" name="file" required />
+    <br>
+    <button type="submit">Upload</button>
+  </form>
+
+  <div id="result" class="link" style="display:none;"></div>
+
+  <script>
+    const form = document.getElementById("uploadForm");
+    const resultDiv = document.getElementById("result");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fileInput = form.querySelector("input[type='file']");
+      const file = fileInput.files[0];
+      if (!file) return alert("Please select a file.");
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const res = await fetch("https://temp-st.sl-bjs.workers.dev/", {
+          method: "POST",
+          body: formData,
+        });
+        const json = await res.json();
+
+        if (json.download_url) {
+          resultDiv.style.display = "block";
+          resultDiv.innerHTML = `
+            ✅ <strong>File uploaded!</strong><br>
+            <strong>Link:</strong><br>
+            <a href="${json.download_url}" target="_blank">${json.download_url}</a><br>
+            ⏳ Expires in: ${json.expires_in}
+          `;
+        } else {
+          resultDiv.innerHTML = "❌ Upload failed.";
+        }
+      } catch (err) {
+        resultDiv.innerHTML = "❌ Upload error.";
+      }
+    });
+  </script>
+</body>
+</html>
